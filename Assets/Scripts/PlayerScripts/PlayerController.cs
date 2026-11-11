@@ -10,6 +10,7 @@ public class PlayerController : MonoBehaviour
 
     private Rigidbody2D rb;
     private PlayerControls playerControls;
+    public PlayerControls Controls => playerControls;
 
     private float movement;
     private bool jumpRequested = false;
