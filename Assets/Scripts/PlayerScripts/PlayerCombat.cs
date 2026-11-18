@@ -1,99 +1,133 @@
+using System.Collections;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
+/// <summary>
+/// Handles player melee combat — attack input, cooldown, input buffering, hitbox detection, and damage dealing.
+/// Designed according to industry-standard 2D action-platformer combat responsiveness.
+/// </summary>
 public class PlayerCombat : MonoBehaviour
 {
     [Header("Attack Settings")]
     [SerializeField] private Transform attackPoint;
-    [SerializeField] private float     attackRange     = 0.65f;
-    [SerializeField] private int       attackDamage    = 1;
-    [SerializeField] private float     attackCooldown  = 0.45f;
-    [SerializeField] private float     attackDuration  = 0.35f;  // fallback if no anim event
-    [SerializeField] private LayerMask enemyLayer;
+    [SerializeField] private float attackRange = 0.5f;
+    [SerializeField] private int attackDamage = 1;
+    [Tooltip("Minimum time in seconds between attacks")]
+    [SerializeField] private float attackCooldown = 0.35f;
+    [SerializeField] private LayerMask enemyLayers;
 
-    [Header("Knockback on Hit")]
-    [SerializeField] private float enemyKnockbackForce = 5f;
+    [Header("Input Buffering (Płynność sterowania)")]
+    [Tooltip("If player presses attack within this many seconds before cooldown ends, the attack will execute immediately when ready")]
+    [SerializeField] private float inputBufferTime = 0.15f;
 
-    // Components
-    private Animator         anim;
-    private PlayerController controller;
-    private PlayerControls   controls;
+    [Header("Knockback Dealt to Enemy")]
+    [SerializeField] private float knockbackForce = 6f;
 
-    // State
-    private float cooldownTimer;
-    private float attackActiveTimer;
-    public  bool  IsAttacking => attackActiveTimer > 0f;
+    private InputAction attackAction;
+    private bool canAttack = true;
+    private float lastAttackInputTime = -999f;
+    private Animator animator;
+    private PlayerController playerController;
+
+    public bool CanAttack => canAttack;
 
     private void Awake()
     {
-        anim       = GetComponent<Animator>();
-        controller = GetComponent<PlayerController>();
+        attackAction = new InputAction("Attack", InputActionType.Button);
+        attackAction.AddBinding("<Mouse>/leftButton");
+        attackAction.AddBinding("<Keyboard>/j");
+
+        animator = GetComponentInChildren<Animator>();
+        playerController = GetComponent<PlayerController>();
     }
 
-    private void Start()
-    {
-        controls = controller.GetPlayerControls();
-    }
+    private void OnEnable() => attackAction.Enable();
+    private void OnDisable() => attackAction.Disable();
 
     private void Update()
     {
-        cooldownTimer     -= Time.deltaTime;
-        attackActiveTimer -= Time.deltaTime;
-
-        if (!controller.CanBeControlled) return;
-
-        if (controls.Movement.Attack.WasPressedThisFrame() && cooldownTimer <= 0f)
-            PerformAttack();
-    }
-
-    // ─── Attack ──────────────────────────────────────────────────────────────
-
-    private void PerformAttack()
-    {
-        cooldownTimer     = attackCooldown;
-        attackActiveTimer = attackDuration;   // timer-based fallback
-
-        if (anim != null)
-            anim.SetTrigger("attack");
-
-        // Determine origin even without a dedicated point
-        Vector2 origin = attackPoint != null
-            ? (Vector2)attackPoint.position
-            : (Vector2)transform.position + Vector2.right * controller.GetFacingDirection() * 0.5f;
-
-        Collider2D[] hits = Physics2D.OverlapCircleAll(origin, attackRange, enemyLayer);
-
-        foreach (Collider2D hit in hits)
+        // Register attack input and timestamp it for buffering
+        if (attackAction.WasPressedThisFrame())
         {
-            EnemyHealth eh = hit.GetComponent<EnemyHealth>();
-            if (eh == null) eh = hit.GetComponentInParent<EnemyHealth>();
-            if (eh == null) continue;
+            lastAttackInputTime = Time.time;
+        }
 
-            eh.TakeDamage(attackDamage);
+        // Check if an attack should be executed (ready + buffered input + not currently stunned)
+        bool hasBufferedInput = (Time.time - lastAttackInputTime) <= inputBufferTime;
+        bool isStunned = playerController != null && playerController.IsHurtStunned;
 
-            Rigidbody2D erb = hit.attachedRigidbody;
-            if (erb != null)
-            {
-                Vector2 dir = (hit.transform.position - transform.position).normalized;
-                erb.AddForce(dir * enemyKnockbackForce, ForceMode2D.Impulse);
-            }
+        if (hasBufferedInput && canAttack && !isStunned)
+        {
+            lastAttackInputTime = -999f; // Consume buffered input
+            Attack();
         }
     }
 
-    /// <summary>Called by an Animation Event at the end of the attack clip.</summary>
-    public void OnAttackAnimationEnd()
+    private void Attack()
     {
-        attackActiveTimer = 0f;
+        canAttack = false;
+
+        // Trigger animation
+        if (animator != null)
+            animator.SetTrigger("Attack");
+
+        // Determine attack position (fallback to in front of player if attackPoint not assigned)
+        Vector3 attackPos;
+        if (attackPoint != null)
+        {
+            attackPos = attackPoint.position;
+        }
+        else
+        {
+            attackPos = transform.position + transform.right * (attackRange * 0.7f);
+        }
+
+        // Detect all enemies in attack range
+        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPos, attackRange, enemyLayers);
+
+        foreach (Collider2D enemy in hitEnemies)
+        {
+            // Deal damage
+            Health enemyHealth = enemy.GetComponent<Health>();
+            if (enemyHealth == null)
+                enemyHealth = enemy.GetComponentInParent<Health>();
+
+            if (enemyHealth != null)
+            {
+                enemyHealth.TakeDamage(attackDamage);
+            }
+
+            // Apply directional knockback to enemy
+            Rigidbody2D enemyRb = enemy.GetComponent<Rigidbody2D>();
+            if (enemyRb == null)
+                enemyRb = enemy.GetComponentInParent<Rigidbody2D>();
+
+            if (enemyRb != null)
+            {
+                float dirX = Mathf.Sign(enemy.transform.position.x - transform.position.x);
+                if (Mathf.Abs(enemy.transform.position.x - transform.position.x) < 0.05f)
+                    dirX = transform.right.x;
+
+                Vector2 knockbackDir = new Vector2(dirX, 0.4f).normalized;
+
+                enemyRb.linearVelocity = new Vector2(0, 0);
+                enemyRb.AddForce(knockbackDir * knockbackForce, ForceMode2D.Impulse);
+            }
+        }
+
+        StartCoroutine(AttackCooldownCoroutine());
     }
 
-    // ─── Gizmos ──────────────────────────────────────────────────────────────
+    private IEnumerator AttackCooldownCoroutine()
+    {
+        yield return new WaitForSeconds(attackCooldown);
+        canAttack = true;
+    }
 
     private void OnDrawGizmosSelected()
     {
-        Vector2 origin = attackPoint != null
-            ? (Vector2)attackPoint.position
-            : (Vector2)transform.position + Vector2.right * 0.5f;
-
+        Vector3 gizmoPos = attackPoint != null ? attackPoint.position : (transform.position + transform.right * (attackRange * 0.7f));
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(origin, attackRange);
+        Gizmos.DrawWireSphere(gizmoPos, attackRange);
     }
 }
