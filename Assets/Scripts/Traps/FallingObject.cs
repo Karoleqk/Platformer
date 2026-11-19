@@ -63,9 +63,15 @@ public class FallingObject : MonoBehaviour
         // Check if player is below this object
         RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, detectionRange, playerLayer);
 
-        if (hit.collider != null && hit.collider.CompareTag("Player"))
+        if (hit.collider != null)
         {
-            TriggerFall();
+            Player player = hit.collider.GetComponent<Player>();
+            if (player == null) player = hit.collider.GetComponentInParent<Player>();
+
+            if (player != null)
+            {
+                TriggerFall();
+            }
         }
     }
 
@@ -105,12 +111,17 @@ public class FallingObject : MonoBehaviour
     {
         if (!isFalling) return;
 
-        if (collision.gameObject.CompareTag("Player"))
+        Player player = collision.gameObject.GetComponent<Player>();
+        if (player == null) player = collision.gameObject.GetComponentInParent<Player>();
+
+        if (player != null)
         {
-            PlayerHealth playerHealth = collision.gameObject.GetComponent<PlayerHealth>();
+            Health playerHealth = collision.gameObject.GetComponent<Health>();
+            if (playerHealth == null) playerHealth = collision.gameObject.GetComponentInParent<Health>();
+
             if (playerHealth != null)
             {
-                playerHealth.TakeDamage(damage, transform.position);
+                playerHealth.TakeDamage(damage);
             }
         }
 

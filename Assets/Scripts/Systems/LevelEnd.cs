@@ -36,11 +36,11 @@ public class LevelEnd : MonoBehaviour
     {
         if (!requireAllEnemiesDefeated) return true;
 
-        // Check if all enemies are dead
-        EnemyHealth[] enemies = FindObjectsByType<EnemyHealth>(FindObjectsSortMode.None);
-        foreach (EnemyHealth enemy in enemies)
+        // Check if all enemies in the scene are dead
+        EnemyAI[] enemies = FindObjectsByType<EnemyAI>(FindObjectsSortMode.None);
+        foreach (EnemyAI enemy in enemies)
         {
-            if (!enemy.IsDead) return false;
+            if (enemy.CurrentState != EnemyAI.EnemyState.Dead) return false;
         }
         return true;
     }
@@ -66,7 +66,10 @@ public class LevelEnd : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player"))
+        Player player = collision.GetComponent<Player>();
+        if (player == null) player = collision.GetComponentInParent<Player>();
+
+        if (player != null)
         {
             playerInRange = true;
         }
@@ -74,7 +77,10 @@ public class LevelEnd : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player"))
+        Player player = collision.GetComponent<Player>();
+        if (player == null) player = collision.GetComponentInParent<Player>();
+
+        if (player != null)
         {
             playerInRange = false;
         }

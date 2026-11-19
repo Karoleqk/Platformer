@@ -8,9 +8,14 @@ public class KillZone : MonoBehaviour
 {
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player"))
+        Player player = collision.GetComponent<Player>();
+        if (player == null) player = collision.GetComponentInParent<Player>();
+
+        if (player != null)
         {
-            PlayerHealth playerHealth = collision.GetComponent<PlayerHealth>();
+            Health playerHealth = collision.GetComponent<Health>();
+            if (playerHealth == null) playerHealth = collision.GetComponentInParent<Health>();
+
             if (playerHealth != null)
             {
                 playerHealth.TakeDamage(999);

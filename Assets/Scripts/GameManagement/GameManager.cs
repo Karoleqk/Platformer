@@ -176,6 +176,22 @@ public class GameManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Load a new level by scene name.
+    /// </summary>
+    public void LoadLevel(string sceneName)
+    {
+        SceneManager.LoadScene(sceneName);
+    }
+
+    /// <summary>
+    /// Reload the current level.
+    /// </summary>
+    public void RestartLevel()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    /// <summary>
     /// Clears all checkpoint data (e.g. when starting a new game).
     /// </summary>
     public void ClearCheckpoints()

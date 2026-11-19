@@ -49,12 +49,17 @@ public class SpikeTrap : MonoBehaviour
     {
         if (!isActive) return;
 
-        if (collision.CompareTag("Player"))
+        Player player = collision.GetComponent<Player>();
+        if (player == null) player = collision.GetComponentInParent<Player>();
+
+        if (player != null)
         {
-            PlayerHealth playerHealth = collision.GetComponent<PlayerHealth>();
+            Health playerHealth = collision.GetComponent<Health>();
+            if (playerHealth == null) playerHealth = collision.GetComponentInParent<Health>();
+
             if (playerHealth != null)
             {
-                playerHealth.TakeDamage(damage, transform.position);
+                playerHealth.TakeDamage(damage);
             }
         }
     }
