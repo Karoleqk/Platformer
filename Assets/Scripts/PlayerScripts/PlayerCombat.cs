@@ -23,10 +23,14 @@ public class PlayerCombat : MonoBehaviour
     [Header("Knockback Dealt to Enemy")]
     [SerializeField] private float knockbackForce = 6f;
 
+    [Header("Game Feel & Impact")]
+    [Tooltip("Brief frame freeze in seconds when a melee hit connects (like Hollow Knight / Dead Cells)")]
+    [SerializeField] private float hitStopDuration = 0.05f;
+
     private InputAction attackAction;
     private bool canAttack = true;
     private float lastAttackInputTime = -999f;
-    private Animator animator;
+    private PlayerAnimator playerAnimator;
     private PlayerController playerController;
 
     public bool CanAttack => canAttack;
@@ -37,7 +41,7 @@ public class PlayerCombat : MonoBehaviour
         attackAction.AddBinding("<Mouse>/leftButton");
         attackAction.AddBinding("<Keyboard>/j");
 
-        animator = GetComponentInChildren<Animator>();
+        playerAnimator = GetComponent<PlayerAnimator>();
         playerController = GetComponent<PlayerController>();
     }
 
@@ -68,8 +72,8 @@ public class PlayerCombat : MonoBehaviour
         canAttack = false;
 
         // Trigger animation
-        if (animator != null)
-            animator.SetTrigger("Attack");
+        if (playerAnimator != null)
+            playerAnimator.TriggerAttack();
 
         // Determine attack position (fallback to in front of player if attackPoint not assigned)
         Vector3 attackPos;
@@ -84,6 +88,11 @@ public class PlayerCombat : MonoBehaviour
 
         // Detect all enemies in attack range
         Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPos, attackRange, enemyLayers);
+
+        if (hitEnemies.Length > 0 && hitStopDuration > 0f)
+        {
+            HitStop.Freeze(hitStopDuration);
+        }
 
         foreach (Collider2D enemy in hitEnemies)
         {

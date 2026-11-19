@@ -45,8 +45,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnTakeDamage()
     {
-        Animator anim = GetComponentInChildren<Animator>();
-        if (anim != null) anim.SetTrigger("Hurt");
+        // Animation is now handled by PlayerAnimator component
     }
 
     private void OnEnable()
@@ -130,6 +129,8 @@ public class PlayerController : MonoBehaviour
 
         // Arc knockback (horizontal + slight upward lift)
         Vector2 knockbackDir = new Vector2(dirX, 0.45f).normalized;
+
+        CameraShake.Shake(0.22f, 0.2f);
 
         StopCoroutine(nameof(HurtStunCoroutine));
         StartCoroutine(HurtStunCoroutine(knockbackDir, force));

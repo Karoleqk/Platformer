@@ -41,7 +41,7 @@ public class EnemyAI : MonoBehaviour
     private EnemyState currentState = EnemyState.Idle;
     private Rigidbody2D rb;
     private Health health;
-    private Animator animator;
+    private EnemyAnimator enemyAnimator;
 
     private Transform player;
     private int currentPatrolIndex = 0;
@@ -58,7 +58,9 @@ public class EnemyAI : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         health = GetComponent<Health>();
-        animator = GetComponentInChildren<Animator>();
+        enemyAnimator = GetComponent<EnemyAnimator>();
+        if (enemyAnimator == null)
+            enemyAnimator = gameObject.AddComponent<EnemyAnimator>();
         spawnPosition = transform.position;
     }
 
@@ -235,8 +237,8 @@ public class EnemyAI : MonoBehaviour
     {
         canAttack = false;
 
-        if (animator != null)
-            animator.SetTrigger("Attack");
+        if (enemyAnimator != null)
+            enemyAnimator.TriggerAttack();
 
         // Small forward lunge during attack
         rb.linearVelocity = new Vector2(transform.right.x * (moveSpeed * 0.7f), rb.linearVelocity.y);
@@ -320,13 +322,15 @@ public class EnemyAI : MonoBehaviour
         isStunned = true;
         canAttack = false;
 
-        if (animator != null)
-            animator.SetTrigger("Hurt");
+        if (enemyAnimator != null)
+            enemyAnimator.TriggerHurt();
 
         // Stunned: enemy slides back from knockback, cannot move or attack
         yield return new WaitForSeconds(hitStunDuration);
 
         isStunned = false;
+        if (enemyAnimator != null)
+            enemyAnimator.ClearHurt();
 
         // Brief delay before the enemy can initiate another attack
         yield return new WaitForSeconds(postStunAttackDelay);
@@ -341,8 +345,8 @@ public class EnemyAI : MonoBehaviour
         currentState = EnemyState.Dead;
         rb.linearVelocity = Vector2.zero;
 
-        if (animator != null)
-            animator.SetTrigger("Death");
+        if (enemyAnimator != null)
+            enemyAnimator.TriggerDeath();
 
         // Disable physics
         Collider2D col = GetComponent<Collider2D>();
@@ -410,10 +414,8 @@ public class EnemyAI : MonoBehaviour
 
     private void UpdateAnimator()
     {
-        if (animator == null) return;
-
-        animator.SetFloat("Speed", Mathf.Abs(rb.linearVelocity.x));
-        animator.SetBool("IsChasing", currentState == EnemyState.Chase);
+        if (enemyAnimator != null)
+            enemyAnimator.UpdateMovement();
     }
 
     private IEnumerator WaitAtPatrolPoint()

@@ -122,6 +122,12 @@ public class FallingObject : MonoBehaviour
             if (playerHealth != null)
             {
                 playerHealth.TakeDamage(damage);
+
+                PlayerController controller = player.GetComponent<PlayerController>();
+                if (controller != null)
+                {
+                    controller.ApplyKnockback(transform.position, 6f);
+                }
             }
         }
 

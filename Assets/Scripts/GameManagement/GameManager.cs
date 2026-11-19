@@ -163,6 +163,10 @@ public class GameManager : MonoBehaviour
         PlayerCombat combat = player.GetComponent<PlayerCombat>();
         if (combat != null) combat.enabled = true;
 
+        // Reset animation state
+        PlayerAnimator animator = player.GetComponent<PlayerAnimator>();
+        if (animator != null) animator.ResetAnimationState();
+
         // Reset physics
         Rigidbody2D rb = player.GetComponent<Rigidbody2D>();
         if (rb != null)

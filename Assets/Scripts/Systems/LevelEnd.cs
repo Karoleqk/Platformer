@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class LevelEnd : MonoBehaviour
+public class LevelEnd : MonoBehaviour, IInteractable
 {
     [Header("Next Level")]
     [SerializeField] private string nextSceneName;
@@ -15,20 +15,19 @@ public class LevelEnd : MonoBehaviour
     private bool isOpen;
     private bool playerInRange;
 
+    public void Interact()
+    {
+        if (isOpen)
+        {
+            LoadNextLevel();
+        }
+    }
+
     private void Update()
     {
         if (!isOpen && ShouldOpen())
         {
             OpenDoor();
-        }
-
-        if (isOpen && playerInRange)
-        {
-            // Player can interact to go to next level
-            if (Input.GetKeyDown(KeyCode.E))
-            {
-                LoadNextLevel();
-            }
         }
     }
 

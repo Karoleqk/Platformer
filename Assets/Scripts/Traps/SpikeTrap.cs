@@ -2,8 +2,9 @@ using UnityEngine;
 
 public class SpikeTrap : MonoBehaviour
 {
-    [Header("Damage")]
+    [Header("Damage & Knockback")]
     [SerializeField] private int damage = 1;
+    [SerializeField] private float knockbackForce = 8f;
 
     [Header("Animated Spikes (optional)")]
     [SerializeField] private bool isAnimated;
@@ -47,6 +48,16 @@ public class SpikeTrap : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        HandlePlayerCollision(collision);
+    }
+
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        HandlePlayerCollision(collision);
+    }
+
+    private void HandlePlayerCollision(Collider2D collision)
+    {
         if (!isActive) return;
 
         Player player = collision.GetComponent<Player>();
@@ -57,9 +68,15 @@ public class SpikeTrap : MonoBehaviour
             Health playerHealth = collision.GetComponent<Health>();
             if (playerHealth == null) playerHealth = collision.GetComponentInParent<Health>();
 
-            if (playerHealth != null)
+            if (playerHealth != null && !playerHealth.IsInvincible)
             {
                 playerHealth.TakeDamage(damage);
+
+                PlayerController controller = player.GetComponent<PlayerController>();
+                if (controller != null)
+                {
+                    controller.ApplyKnockback(transform.position, knockbackForce);
+                }
             }
         }
     }

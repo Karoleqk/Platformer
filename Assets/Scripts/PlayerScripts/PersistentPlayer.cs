@@ -25,6 +25,12 @@ public class Player : MonoBehaviour
         {
             gameObject.AddComponent<HealthUI>();
         }
+
+        // Ensure PlayerAnimator is present to drive animation parameters
+        if (GetComponent<PlayerAnimator>() == null)
+        {
+            gameObject.AddComponent<PlayerAnimator>();
+        }
     }
 
     private void Start()
