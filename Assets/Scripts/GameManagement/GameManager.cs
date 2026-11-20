@@ -40,6 +40,9 @@ public class GameManager : MonoBehaviour
     /// True while waiting for a respawn scene load.
     /// </summary>
     public bool IsPendingRespawn => pendingRespawn;
+    public bool HasCheckpoint => hasCheckpoint;
+    public Vector3 LastCheckpointPosition => lastCheckpointPosition;
+    public string LastCheckpointScene => lastCheckpointScene;
 
     private void Awake()
     {
@@ -90,25 +93,12 @@ public class GameManager : MonoBehaviour
     private void RespawnPlayer()
     {
         string currentScene = SceneManager.GetActiveScene().name;
+        string targetScene = hasCheckpoint && !string.IsNullOrEmpty(lastCheckpointScene)
+            ? lastCheckpointScene
+            : currentScene;
 
-        if (hasCheckpoint)
-        {
-            if (lastCheckpointScene != currentScene)
-            {
-                pendingRespawn = true;
-                SceneManager.LoadScene(lastCheckpointScene);
-            }
-            else
-            {
-                ResetPlayer(lastCheckpointPosition, true);
-            }
-        }
-        else
-        {
-            // No checkpoint: reload current scene so enemies and level elements reset
-            pendingRespawn = true;
-            SceneManager.LoadScene(currentScene);
-        }
+        pendingRespawn = true;
+        SceneManager.LoadScene(targetScene);
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)

@@ -57,6 +57,10 @@ public class Player : MonoBehaviour
         if (GameManager.Instance != null && GameManager.Instance.IsPendingRespawn)
             return;
 
+        // If there is an active checkpoint in this scene, GameManager will handle positioning
+        if (GameManager.Instance != null && GameManager.Instance.HasCheckpoint && GameManager.Instance.LastCheckpointScene == scene.name)
+            return;
+
         SpawnPoint spawnPoint = FindAnyObjectByType<SpawnPoint>();
 
         if(spawnPoint != null)

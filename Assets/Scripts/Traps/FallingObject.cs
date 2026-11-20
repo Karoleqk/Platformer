@@ -60,15 +60,16 @@ public class FallingObject : MonoBehaviour
 
     private void DetectPlayer()
     {
-        // Check if player is below this object
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, detectionRange, playerLayer);
+        // Check if player is below this object (with fallback if playerLayer is not assigned in Inspector)
+        LayerMask mask = playerLayer.value != 0 ? playerLayer : (LayerMask)(~0);
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, detectionRange, mask);
 
         if (hit.collider != null)
         {
             Player player = hit.collider.GetComponent<Player>();
             if (player == null) player = hit.collider.GetComponentInParent<Player>();
 
-            if (player != null)
+            if (player != null || hit.collider.CompareTag("Player"))
             {
                 TriggerFall();
             }

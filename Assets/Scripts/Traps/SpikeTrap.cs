@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Collider2D))]
 public class SpikeTrap : MonoBehaviour
 {
     [Header("Damage & Knockback")]
@@ -19,7 +20,19 @@ public class SpikeTrap : MonoBehaviour
     private void Awake()
     {
         spikeCollider = GetComponent<Collider2D>();
+        if (spikeCollider != null)
+            spikeCollider.isTrigger = true;
+
         spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer != null)
+        {
+            // Ensure spikes render in front of tilemaps/ground
+            if (string.IsNullOrEmpty(spriteRenderer.sortingLayerName) || spriteRenderer.sortingLayerName == "Default")
+            {
+                spriteRenderer.sortingLayerName = "Foreground";
+                spriteRenderer.sortingOrder = 5;
+            }
+        }
     }
 
     private void Start()

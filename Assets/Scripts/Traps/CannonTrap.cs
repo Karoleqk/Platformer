@@ -64,9 +64,15 @@ public class CannonTrap : MonoBehaviour
     private bool IsPlayerInLineOfSight()
     {
         Vector3 origin = firePoint != null ? firePoint.position : transform.position;
-        RaycastHit2D hit = Physics2D.Raycast(origin, fireDirection.normalized, detectionRange, playerLayer);
+        LayerMask mask = playerLayer.value != 0 ? playerLayer : (LayerMask)(~0);
+        RaycastHit2D hit = Physics2D.Raycast(origin, fireDirection.normalized, detectionRange, mask);
 
-        return hit.collider != null;
+        if (hit.collider == null) return false;
+
+        Player player = hit.collider.GetComponent<Player>();
+        if (player == null) player = hit.collider.GetComponentInParent<Player>();
+
+        return player != null || hit.collider.CompareTag("Player");
     }
 
     private void OnDrawGizmosSelected()

@@ -15991,7 +15991,7 @@ GameObject:
   - component: {fileID: 1430911338}
   m_Layer: 6
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -16210,6 +16210,7 @@ MonoBehaviour:
     m_Bits: 128
   inputBufferTime: 0.15
   knockbackForce: 5
+  hitStopDuration: 0.05
 --- !u!114 &1430911339
 MonoBehaviour:
   m_ObjectHideFlags: 0

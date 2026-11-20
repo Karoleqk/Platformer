@@ -35,6 +35,18 @@ public class HealthUI : MonoBehaviour
     private Texture2D fullHeartTex;
     private Texture2D emptyHeartTex;
 
+    private string notificationText = "";
+    private float notificationTimer = 0f;
+
+    /// <summary>
+    /// Displays a temporary banner notification on screen (e.g. "Checkpoint Saved!").
+    /// </summary>
+    public void ShowNotification(string text, float duration = 2.5f)
+    {
+        notificationText = text;
+        notificationTimer = duration;
+    }
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -176,6 +188,23 @@ public class HealthUI : MonoBehaviour
             GUI.Box(deadRect, "");
             GUI.Label(new Rect(deadRect.x, deadRect.y + 10, deadRect.width, 40), "GAME OVER", deadStyle);
             GUI.Label(new Rect(deadRect.x, deadRect.y + 55, deadRect.width, 30), "Respawning at checkpoint...", subStyle);
+        }
+
+        // 4. Temporary Banner Notification (e.g. Checkpoint)
+        if (notificationTimer > 0f)
+        {
+            notificationTimer -= Time.deltaTime;
+            GUIStyle notifStyle = new GUIStyle(GUI.skin.label)
+            {
+                fontSize = 16,
+                fontStyle = FontStyle.Bold,
+                alignment = TextAnchor.MiddleCenter
+            };
+            notifStyle.normal.textColor = new Color(0.2f, 1f, 0.5f, Mathf.Clamp01(notificationTimer));
+
+            Rect notifRect = new Rect(Screen.width / 2f - 160, 25, 320, 32);
+            GUI.Box(notifRect, "");
+            GUI.Label(notifRect, notificationText, notifStyle);
         }
     }
 
