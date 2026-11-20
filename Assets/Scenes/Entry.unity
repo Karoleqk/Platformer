@@ -18863,6 +18863,11 @@ GameObject:
   m_IsActive: 1
 --- !u!4 &2119653121
 Transform:
+  m_CorrespondingSourceObject: {fileID: 3564026850829729314, guid: 0cadafc44435d2649b8aa171d49f61d6, type: 3}
+  m_PrefabInstance: {fileID: 680745673}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &2119653120
+GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
