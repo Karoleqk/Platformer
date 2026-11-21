@@ -2331,7 +2331,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 46.21, y: -5.8500004, z: -10}
+  m_LocalPosition: {x: 1.1800001, y: -1.3499999, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -6385,7 +6385,7 @@ GameObject:
   - component: {fileID: 1352073521}
   - component: {fileID: 1352073520}
   - component: {fileID: 1352073519}
-  m_Layer: 6
+  m_Layer: 8
   m_Name: LevelColliders
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -16138,7 +16138,7 @@ Transform:
   m_GameObject: {fileID: 1430911330}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 45.71, y: -8.85, z: 0}
+  m_LocalPosition: {x: 0.68, y: -4.35, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -18864,11 +18864,6 @@ GameObject:
   m_IsActive: 1
 --- !u!4 &2119653121
 Transform:
-  m_CorrespondingSourceObject: {fileID: 3564026850829729314, guid: 0cadafc44435d2649b8aa171d49f61d6, type: 3}
-  m_PrefabInstance: {fileID: 680745673}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &2119653120
-GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
